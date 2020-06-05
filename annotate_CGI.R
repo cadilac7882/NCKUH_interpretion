@@ -2,8 +2,8 @@ if(any(grepl(names(target),pattern = "CGI_annotation"))){
   target<-target[,-grep(names(target),pattern = "CGI_annotation")]
 }
 
-CGI_with_position<-fread("~/137_share/Database/CGI/20191212/hg19_CGI_with_pos_20200115.txt",sep="\t",stringsAsFactors = F)
-CGI_without_position<-fread("~/137_share/Database/CGI/20191212/hg19_CGI_without_pos_20200115.txt",sep="\t",stringsAsFactors = F)
+CGI_with_position<-fread(paste0(interpretor_path,"db/hg19_CGI_with_pos_20200115.txt"),sep="\t",stringsAsFactors = F)
+CGI_without_position<-fread(paste0(interpretor_path,"db/hg19_CGI_without_pos_20200115.txt"),sep="\t",stringsAsFactors = F)
 
 ####### annotation oncoKB_with_position
 target<-merge(target,CGI_with_position,by.x=names(target)[1:5],by.y=names(CGI_with_position)[1:5],all.x=T)
@@ -43,4 +43,4 @@ for(i in 1:nrow(CGI_without_position)){
   }
 }
 
-
+cat("Success!\n")
