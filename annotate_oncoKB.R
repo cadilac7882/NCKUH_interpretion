@@ -1,8 +1,9 @@
 if(any(grepl(names(target),pattern = "oncoKB_annotation"))){
   target<-target[,-grep(names(target),pattern = "oncoKB_annotation")]
 }
-oncoKB_with_position<-fread("~/137_share/Database/oncoKB/hg19_oncoKB_with_position_20200110.txt",sep="\t",stringsAsFactors = F,data.table = F)
-oncoKB_without_position<-fread("~/137_share/Database/oncoKB/hg19_oncoKB_without_position_20200110.txt",sep="\t",stringsAsFactors = F,data.table = F)
+
+oncoKB_with_position<-fread(paste0(interpretor_path,"db/hg19_oncoKB_with_position_20200110.txt"),sep="\t",stringsAsFactors = F,data.table = F)
+oncoKB_without_position<-fread(paste0(interpretor_path,"db/hg19_oncoKB_without_position_20200110.txt"),sep="\t",stringsAsFactors = F,data.table = F)
 
 ####### annotation oncoKB_with_position
 target<-merge(target,oncoKB_with_position,by.x=names(target)[1:5],by.y=names(oncoKB_with_position)[1:5],all.x=T)
@@ -43,7 +44,7 @@ for(i in 1:nrow(oncoKB_without_position)){
   }
 }
 
-
+cat("Success!\n")
 
 
 

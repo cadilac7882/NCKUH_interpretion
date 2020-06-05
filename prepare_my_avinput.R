@@ -1,6 +1,6 @@
 library(vcfR)
 # setwd("~/137_share/KD/interpretation/")
-# input_vcf="~/137_share/KD/interpretation/pca104_OCPv1_DNA_pca104_OCPv1_RNA_Non-Filtered_2019-12-12_10_57_47.vcf"
+# input_vcf="~/137_share/147_backup/interpretation/00228512_OCPv1.vcf"
 vcf<-read.vcfR(input_vcf)
 ### select by filter
 ind<-which(vcf@fix[,"FILTER"]=="PASS")
@@ -48,17 +48,21 @@ decomposed_vcf<-decomposed_vcf[-grep(decomposed_vcf$ALT,pattern = ","),]
 
 decomposed_vcf$AF<-as.numeric(decomposed_vcf$AF)
 decomposed_vcf<-decomposed_vcf[which(decomposed_vcf$AF!=0),]
+
+decomposed_vcf$FDP<-as.numeric(decomposed_vcf$FDP)
+decomposed_vcf<-decomposed_vcf[!is.na(decomposed_vcf$FDP),]
+
 decomposed_vcf$FAO<-as.numeric(decomposed_vcf$FAO)
+decomposed_vcf$FAO<-ifelse(is.na(decomposed_vcf$FAO),round(decomposed_vcf$FDP*decomposed_vcf$AF,digits = 0),decomposed_vcf$FAO)
 # decomposed_vcf[which(decomposed_vcf$POS=="55141050"),]
 
 
 decomposed_vcf$END<-decomposed_vcf$POS
-decomposed_vcf<-decomposed_vcf[,c("CHROM","POS","END","REF","ALT","GT","QUAL","FDP","AF")]
+decomposed_vcf<-decomposed_vcf[,c("CHROM","POS","END","REF","ALT","GT","QUAL","FDP","AF","FAO")]
 
 ## normalization
 for(i in 1:nrow(decomposed_vcf)){
   print(i)
-  # i=154
   # decomposed_vcf[i,]
   
   if(nchar(decomposed_vcf$REF[i])!=1|nchar(decomposed_vcf$ALT[i])!=1){
@@ -82,4 +86,4 @@ decomposed_vcf$GT<-ifelse(decomposed_vcf$GT=="0/1","het","hom")
 
 write.table(decomposed_vcf,file=tmp_output_avinput,sep="\t",row.names = F,quote=F,col.names = F)
 
-
+cat("Success!\n")
