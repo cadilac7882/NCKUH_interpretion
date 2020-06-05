@@ -1,10 +1,32 @@
-# setwd("~/137_share/KD/interpretation/")
+##### Version:2 
+##### Update Date:2020-02-12
+
+setwd("~/137_share/147_backup/VIP/")
+
 annovar_path<-"~/137_share/147_backup/annovar/"
+interpretor_path<-"~/137_share/147_backup/interpretation/"
+
+
+## check required packages
+# if(!requireNamespace("data.table", quietly = TRUE)){
+#   install.packages("data.table")
+# }else if(!requireNamespace("vcfR", quietly = TRUE)){
+#   install.packages("vcfR")
+# }else if(!requireNamespace("BiocManager", quietly = TRUE)){
+#   install.packages("BiocManager")
+# }else if(!requireNamespace("Rsamtools", quietly = TRUE)){
+#   BiocManager::install("Rsamtools")
+# }else if(!requireNamespace("BSgenome", quietly = TRUE)){
+#   BiocManager::install("BSgenome")
+# }else{
+#   
+# }
 
 library(data.table)
-source("~/137_share/Database/oncoKB/functions.R")
+source(paste0(interpretor_path,"script/functions.R"))
 args <- commandArgs(trailingOnly = TRUE)
-# args <-"-vcf=07366605_OCPv1_DNA_07366605_OCPv1_RNA_Non-Filtered_2019-11-14_11_00_41.vcf -out=07366605_with_AF.txt -annotateDB=oncoKB,CGI -annotateVAF"
+#args="-avinput=media/pathogenic_table_WPlcEpR/pathogenic_table.txt -out=media/pathogenic_table_WPlcEpR/pathogenic_table_WPlcEpR.txt"
+# args <-"-vcf=00228512_OCPv1.vcf -out=00228512_OCPv1.txt"
 options<-unlist(strsplit(args,split=" "))
 
 
@@ -23,7 +45,7 @@ if(length(input_vcf)==0&length(input_avinput)==0){ ### no input file
     tmp_output_avinput <- gsub(input_vcf,pattern = ".vcf$",replacement = ".decompose.avinput")
     cat("---prepare avinput-----------------------------\n")
     
-    source("~/137_share/KD/interpretation/prepare_my_avinput.R")
+    source(paste0(interpretor_path,"script/prepare_my_avinput.R"))
     cat(paste0("Create avinput: ",tmp_output_avinput,"\n"))
     tmp_annovar<-gsub(input_vcf,pattern = ".vcf$",replacement = "_annovar")
     
@@ -39,24 +61,36 @@ if(length(input_vcf)==0&length(input_avinput)==0){ ### no input file
   system(paste0("perl ",annovar_path,"table_annovar.pl ",
           tmp_output_avinput," ",
           annovar_path,"humandb/ -buildver hg19 -out ",
-          tmp_annovar," -remove -protocol refGene,avsnp150,ClinGen_annotation,gnomad211_genome,Taiwan_Biobank,LOVD_all,clinvar_20191125,cosmic90_coding,dbnsfp35c,CIVIC_annotation,OCP_ver2 -operation g,f,f,f,f,f,f,f,f,f,f -nastring ."))
+          tmp_annovar," -remove -protocol refGene,avsnp150,ClinGen_annotation,gnomad211_genome,Taiwan_Biobank,LOVD_all,clinvar_20191125,cosmic90_coding,dbnsfp35a,CIVIC_annotation,OCP_ver2 -operation g,f,f,f,f,f,f,f,f,f,f -nastring ."))
   annovar_result<-paste0(tmp_annovar,".hg19_multianno.txt")
   cat(paste0("Create annovar result: ",annovar_result,"\n"))
   
+  #### testing data ####################
+  # annovar_result="../../../KD/interpretation/02-13528-4_02-13528-4_RNA_Non-Filtered_2018-05-01_14_27_22_annovar.hg19_multianno.txt"
+  # tmp_output_avinput<-"../../../KD/interpretation/02-13528-4_02-13528-4_RNA_Non-Filtered_2018-05-01_14_27_22.decompose.avinput"
+  # output<-"../../../KD/interpretation/02-13528-4_02_test_ver4.txt"
+  ######################################
   
   cat("---annotate oncoKB-----------------------------\n")
-  # annovar_result="../../../KD/interpretation/0022851-2_0022851-2_RNA_Non-Filtered_2018-01-17_10_35_34_annovar.hg19_multianno.txt"
   target <- fread(annovar_result,sep = "\t",stringsAsFactors = F,data.table = F)
-  source("~/137_share/KD/interpretation/annotate_oncoKB.R")
+  source(paste0(interpretor_path,"script/annotate_oncoKB.R"))
   
   cat("---annotate CGI -------------------------------\n")
-  source("~/137_share/KD/interpretation/annotate_CGI.R")
+  source(paste0(interpretor_path,"script/annotate_CGI.R"))
+  
+  cat("---summarize prediction -----------------------\n")
+  source(paste0(interpretor_path,"script/summarize_prediction.R"))
   
   cat("---annotate VAF--------------------------------\n")
-  source("~/137_share/KD/interpretation/annotateVAF.R")
+  source(paste0(interpretor_path,"script/annotateVAF.R"))
   cat(paste0("Create final result: ",output,"\n"))
-}
   
+  cat("---Layering -----------------------------------\n")
+  system(paste0("python3 ",interpretor_path,"script/pipeline.py --input ",output," --output ",gsub(output,pattern = ".txt$",replacement = "")))
+  cat("Job finished!\n")
+}
+
+
   
 
 
